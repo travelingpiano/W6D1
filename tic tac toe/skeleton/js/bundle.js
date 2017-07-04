@@ -166,44 +166,64 @@ module.exports = Game;
 
 class View {
   constructor(game, $el) {
-
+    this.game = game;
+    this.$el = $el;
+    this.setupBoard();
+    this.bindEvents();
   }
 
-  bindEvents() {}
+  bindEvents() {
+    let currentView = this;
+    this.$el.each(function() {
+      let $li = $('li.cell');
+      $li.each(function(idx){
+        $(this).on("click", function() {
+          if (currentView.game.board.isEmptyPos([Math.floor(idx/3), idx%3])) {
+            currentView.makeMove($(this));
+          } else {
+            alert("Invalid move");
+          }
+          currentView.game.playMove([Math.floor(idx/3), idx%3]);
+          if (currentView.game.winner()) {
+            alert("Won");
+          }
+          // $(this).css({
+          //   background: 'blue'
+          // });
+        });
+      });
+    });
+  }
 
-  makeMove($square) {}
+  makeMove($square) {
+    $square.css ({
+      background: 'white'
+    });
+
+    if (this.game.currentPlayer === "x") {
+      $square.css({
+        background: 'green'
+      });
+    } else {
+      $square.css({
+        background: 'blue'
+      });
+    }
+  }
 
   setupBoard() {
-    $('figure.ttt').append("<ul id='grid'></ul>");
-    $("#grid").css({
+    const $grid = $("<ul id='grid'>");
+    $('figure.ttt').append($grid);
+    $grid.css({
       height: 600,
       width: 600,
-      // border: '4px solid red',
       background: 'transparent'
     });
     for(let i = 0; i<9;i++){
       const $li = $("<li class=cell>");
-
-      // $("#grid").append("<li style='list-style-type: none;' value='' class='cell' ></li>");
-      // $("li.cell").css({
-      //   float: 'left',
-      //   width: 188,
-      //   height: 188,
-      //   border: '4px solid black',
-      //   background: 'gray'
-      // });
-      $li.on("mouseover",function(){
-        $li.css({
-          background: 'yellow'
-        });
-      });
-      $li.on("mouseout",function(){
-        $li.css({
-          background: 'gray'
-        });
-      });
-      $("#grid").append($li);
+      $grid.append($li);
     }
+    this.$el = $grid;
   }
 }
 
@@ -350,8 +370,7 @@ const Game = __webpack_require__(1);// require appropriate file
 $( () => {
   // Your code here
   let ttt = $("figure.ttt");
-  let newview = new View;
-  newview.setupBoard();
+  let newview = new View(new Game());
 });
 
 
